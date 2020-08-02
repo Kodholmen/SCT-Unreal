@@ -7,10 +7,7 @@ Spatial Camera Tracker is a virtual production tool allowing you to capture HD v
 
 Import the tracking information into Unreal Engine and drive virtual cameras, replaying the original camera movements, and capture CG footage and combine with your real life footage using standard video editing software or in-engine techniques. As the information is recorded you can iterate on your virtual scenes until you are happy with the result.
 
-Spatial Camera Tracker contains 3 capture modes:
-Body Tracking - Full human skeleton joint tracking of a single person being filmed. Use this mode to anchor CG effects to the person being filmed.
-Camera World Tracking - 6 DOF tracking of the phone's location and rotation in 3D space. Use this mode to align CG  footage with camera recorded footage.
-Green Screen Recording - Same as Camera World Tracking but with a green screen effect applied segmenting out any humans being recorded. Use this mode to align camera recorded footage with CG rendered scenes.
+The full User Guide can be found here: http://kodholmen.com/sct
 
-LiDAR support - Spatial Camera Tracker also supports capturing the surrounding environment geometry using the LiDAR sensor on the latest iPad Pro! Use the mesh to line up CG objects and effects with the real world recorded footage. 
-Or simply use the mesh to help recreate a virtual version of the real world.
+# Where's the code?
+Don't worry. It will be up any day now.
