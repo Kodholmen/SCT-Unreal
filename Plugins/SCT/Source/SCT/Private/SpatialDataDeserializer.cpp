@@ -62,23 +62,28 @@ namespace kh
 		FromBuffer >> DeviceOrientation;
 		FromBuffer >> HorizontalFOV;
 		FromBuffer >> VerticalFOV;
+		FromBuffer >> FocalLengthX;
+		FromBuffer >> FocalLengthY;
+		FromBuffer >> CaptureType;
 
-		check(Version == 202002 && "Version Mismatch. Make sure your plugin and App versions match");
+		check(Version == 202004 && "Version Mismatch. Make sure your plugin and App versions match");
 
 		UE_LOG(LogSpatialDataDeserializer, Display, TEXT("[MR LIVELINK] Version: %d, Frames: %d, Device Orientation: %d, Horizontal FOV: %f, Vertical FOV: %f"), Version, FrameCount, DeviceOrientation, HorizontalFOV, VerticalFOV);
 	}
 
-	void FSpatialDataDeserializer::DeserialiseCameraTransform()
+	void FSpatialDataDeserializer::DeserialiseCamera()
 	{
 		if (bShouldDeserialize == false)
 			return;
 
 		FVector Pos = FVector::ZeroVector;
 		FVector Rot = FVector::ZeroVector;
-		//	FQuat Rot = FQuat::Identity;
 
+		FromBuffer >> CameraMetaData.Timestamp;
 		FromBuffer >> Pos;
 		FromBuffer >> Rot;
+		FromBuffer >> CameraMetaData.ExposureOffset;
+		FromBuffer >> CameraMetaData.ExposureDuration;
 
 		CameraTransform.SetLocation(FVector(-Pos.Z, Pos.X, Pos.Y) * 100.0f);
 		//PYR from RPY
@@ -144,10 +149,10 @@ namespace kh
 		}
 	}
 
-	void FSpatialDataDeserializer::DeserialiseCameraTransform(TArray<uint8>& RecvBuffer)
+	void FSpatialDataDeserializer::DeserialiseCamera(TArray<uint8>& RecvBuffer)
 	{
 		InitWithBuffer(RecvBuffer);
-		DeserialiseCameraTransform();
+		DeserialiseCamera();
 	}
 
 	void FSpatialDataDeserializer::DeserialiseSkeleton(TArray<uint8>& RecvBuffer)
@@ -181,6 +186,11 @@ namespace kh
 	const FTransform& FSpatialDataDeserializer::GetCameraTransform() const
 	{
 		return CameraTransform;
+	}
+
+	const FCameraFrameMetaData& FSpatialDataDeserializer::GetCameraFrameMetaData() const
+	{
+		return CameraMetaData;
 	}
 
 	const FSkeletonDefinition& FSpatialDataDeserializer::GetSkeletonDefinition() const

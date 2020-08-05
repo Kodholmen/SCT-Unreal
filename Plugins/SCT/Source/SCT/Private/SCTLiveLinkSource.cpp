@@ -134,7 +134,7 @@ void FSCTLiveLinkSource::UpdateBaseFrameData(FLiveLinkBaseFrameData& InOutData, 
 void FSCTLiveLinkSource::UpdateTransformFrameData(FLiveLinkTransformFrameData& InOutData, float DeltaTime)
 {
 	UpdateBaseFrameData(InOutData, DeltaTime);
-	SpatialData.DeserialiseCameraTransform();
+	SpatialData.DeserialiseCamera();
 	InOutData.Transform = SpatialData.GetCameraTransform();
 }
 

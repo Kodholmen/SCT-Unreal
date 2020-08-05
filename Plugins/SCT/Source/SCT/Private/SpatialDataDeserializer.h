@@ -40,6 +40,13 @@ namespace kh
 		TArray<FTransform> NeutralTransforms;
 	};
 
+	struct FCameraFrameMetaData
+	{
+		double Timestamp;
+		float ExposureOffset;
+		double ExposureDuration;
+	};
+
 	/**
 	 *
 	 */
@@ -51,16 +58,17 @@ namespace kh
 
 		void InitWithBuffer(TArray<uint8>& RecvBuffer);
 		void DeserializeHeader();
-		void DeserialiseCameraTransform();
+		void DeserialiseCamera();
 		void DeserializeSkeletonDefinition();
 		void DeserialiseSkeleton();
 
-		void DeserialiseCameraTransform(TArray<uint8>& RecvBuffer);
+		void DeserialiseCamera(TArray<uint8>& RecvBuffer);
 		void DeserialiseSkeleton(TArray<uint8>& RecvBuffer);
 
 		bool StepFrame(bool bLoop = true);
 
 		const FTransform& GetCameraTransform() const;
+		const FCameraFrameMetaData& GetCameraFrameMetaData() const;
 		const FSkeletonDefinition& GetSkeletonDefinition() const;
 		const FSkeletonTransforms& GetSkeletonTransforms() const;
 		const int32 GetDeviceOrientation() const;
@@ -69,16 +77,22 @@ namespace kh
 		FTransform DeserializeTransform();
 
 		bool bShouldDeserialize;
+		int32 CurrFrame;
+
+		// Header
 		int32 Version;
 		int32 FrameCount;
 		int32 DeviceOrientation; //UIDeviceOrientation
 		float HorizontalFOV;
 		float VerticalFOV;
-		int32 CurrFrame;
+		float FocalLengthX;
+		float FocalLengthY;
+		int CaptureType;
 
 		FMRSerializeFromBuffer FromBuffer;
 
 		FTransform CameraTransform;
+		FCameraFrameMetaData CameraMetaData;
 
 		FSkeletonDefinition SkeletonDefinition;
 		FSkeletonTransforms SkeletonTransforms;

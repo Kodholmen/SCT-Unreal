@@ -65,7 +65,7 @@ void ASCTReplaySkeletonPawn::Tick(float DeltaTime)
 		return;
 
 	SpatialData.DeserialiseSkeleton();
-	SpatialData.DeserialiseCameraTransform();
+	SpatialData.DeserialiseCamera();
 
 	const kh::FSkeletonTransforms& SkeletonTransforms = SpatialData.GetSkeletonTransforms();
 	for (int i = 0, e = SkeletonTransforms.Transforms.Num(); i < e; ++i)

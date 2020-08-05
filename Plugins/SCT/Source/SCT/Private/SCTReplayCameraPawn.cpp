@@ -62,7 +62,7 @@ void ASCTReplayCameraPawn::Tick(float DeltaTime)
 	if (bRunning == false)
 		return;
 
-	SpatialData.DeserialiseCameraTransform();
+	SpatialData.DeserialiseCamera();
 
 	FTransform CameraTransform = SpatialData.GetCameraTransform();
 	SetActorRelativeTransform(CameraTransform);
