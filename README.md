@@ -8,6 +8,3 @@ Spatial Camera Tracker is a virtual production tool allowing you to capture HD v
 Import the tracking information into Unreal Engine and drive virtual cameras, replaying the original camera movements, and capture CG footage and combine with your real life footage using standard video editing software or in-engine techniques. As the information is recorded you can iterate on your virtual scenes until you are happy with the result.
 
 The full User Guide can be found here: http://kodholmen.com/sct
-
-# Where's the code?
-Don't worry. It will be up any day now.
