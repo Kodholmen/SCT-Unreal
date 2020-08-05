@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "SCT",
+	"Description": "Spatial Camera Tracker",
+	"Category": "Virtual Production",
+	"CreatedBy": "Kodholmen AB",
+	"CreatedByURL": "",
+	"DocsURL": "http://kodholmen.com/sct",
+	"MarketplaceURL": "",
+	"SupportURL": "http://kodholmen.com/sct",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "SCT",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
