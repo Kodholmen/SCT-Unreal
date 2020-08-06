@@ -12,6 +12,10 @@ The full User Guide for the App can be found here: http://kodholmen.com/sct
 # Plugin User Guide
 The plugin comes with simple usage examples. You find the scenes under "SCT Content/Maps". The collection will grow over time.
 
+## What's supported?
+Although the plugin contains Live Link code it's not supported yet. It's work in progress.
+The current release supports replay of Camera and Skeleton sessions. See the bundled Blueprints under "SCT Content/Blueprints" for usage.
+
 ## Import a spatial camera recording
 The first thing you want to do is to transfer the session you want to use from the iPhone/iPad onto the computer you are running Unreal on by going into the share view in SCT and use any of the standard sharing mechanism.
 You can also use the "Files" application on your device to find/view/share the files.

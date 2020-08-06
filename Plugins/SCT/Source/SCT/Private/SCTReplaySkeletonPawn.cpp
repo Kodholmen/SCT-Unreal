@@ -24,6 +24,10 @@ SOFTWARE.
 #include "SCTReplaySkeletonPawn.h"
 #include "DrawDebugHelpers.h"
 
+#include "GenericPlatform/GenericPlatformFile.h"
+#include "HAL/PlatformFilemanager.h"
+
+
 #define LOCTEXT_NAMESPACE "FSCTLiveLinkModule"
 DEFINE_LOG_CATEGORY_STATIC(SCTReplaySkeletonPawn, Log, All);
 

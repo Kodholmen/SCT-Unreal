@@ -24,6 +24,8 @@ SOFTWARE.
 #include "SCTLiveLinkSource.h"
 #include "ILiveLinkClient.h"
 
+#include "GenericPlatform/GenericPlatformFile.h"
+#include "HAL/PlatformFilemanager.h"
 #include "Misc/FrameRate.h"
 #include "Roles/LiveLinkTransformRole.h"
 #include "Roles/LiveLinkTransformTypes.h"

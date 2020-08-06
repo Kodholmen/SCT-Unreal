@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include "SCTReplayCameraPawn.h"
+#include "GenericPlatform/GenericPlatformFile.h"
+#include "HAL/PlatformFilemanager.h"
 
 #define LOCTEXT_NAMESPACE "FSCTLiveLinkModule"
 DEFINE_LOG_CATEGORY_STATIC(SCTReplayCameraPawn, Log, All);
