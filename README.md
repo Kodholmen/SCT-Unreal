@@ -7,4 +7,24 @@ Spatial Camera Tracker is a virtual production tool allowing you to capture HD v
 
 Import the tracking information into Unreal Engine and drive virtual cameras, replaying the original camera movements, and capture CG footage and combine with your real life footage using standard video editing software or in-engine techniques. As the information is recorded you can iterate on your virtual scenes until you are happy with the result.
 
-The full User Guide can be found here: http://kodholmen.com/sct
+The full User Guide for the App can be found here: http://kodholmen.com/sct
+
+# Plugin User Guide
+The plugin comes with simple usage examples. You find the scenes under "SCT Content/Maps". The collection will grow over time.
+
+## Import a spatial camera recording
+The first thing you want to do is to transfer the session you want to use from the iPhone/iPad onto the computer you are running Unreal on by going into the share view in SCT and use any of the standard sharing mechanism.
+You can also use the "Files" application on your device to find/view/share the files.
+
+Place the files anywhere you want. It doesn't have to be under the project folder structure as the files are currently referenced as relative paths from the plugin. This will change in future versions to an import mechanism storing the data as a Data asset that can be packaged in build.
+
+## Replay a captured session
+To use your captured sessions follow the steps below:
+* Place an empty Actor in your map. This will serve as the camera anchor allowing you to move the spatial camera around the scene to position it depending on what you want to record. The replay will be relative the anchor's location.
+* Place an instance of the "BP_SCTReplayCameraPawn" Blueprint located under SCT Content/Blueprints in the scene.
+* Attach the Blueprint to the empty Actor you placed in the first step. Make the local position 0/0/0 to make it more clear where the camera replay will originate from.
+* Select the BP_SCTReplayCameraPawn and view the properties.
+![Alt text](Documentation/SpatialCameraPlayer_Properties.PNG?raw=true "Properties")
+* Reference the data asset you previously imported by pressing the "File Name Path" ... button.
+* If you want the replay to auto play when previewing the Map, check the "Auto Play" check box. If you want to time your start leave it unchecked and control the start manually from Blueprint. Check the BP_SCTReplayCameraPawn for how Auto Start does it.
+Press play and the camera should replay the recorded session!
