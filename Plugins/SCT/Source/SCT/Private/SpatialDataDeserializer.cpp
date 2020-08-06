@@ -29,12 +29,14 @@ namespace kh
 {
 	FSpatialDataDeserializer::FSpatialDataDeserializer()
 		: bShouldDeserialize(true)
+		, CurrFrame(0)
 		, Version(0)
 		, FrameCount(0)
 		, DeviceOrientation(0)
 		, HorizontalFOV(0.0f)
 		, VerticalFOV(0.0f)
-		, CurrFrame(0)
+		, FocalLengthX(0.0f)
+		, FocalLengthY(0.0f)
 		, CameraTransform()
 	{
 		CameraTransform.SetLocation(FVector::ZeroVector);
@@ -68,7 +70,7 @@ namespace kh
 
 		check(Version == 202004 && "Version Mismatch. Make sure your plugin and App versions match");
 
-		UE_LOG(LogSpatialDataDeserializer, Display, TEXT("[MR LIVELINK] Version: %d, Frames: %d, Device Orientation: %d, Horizontal FOV: %f, Vertical FOV: %f"), Version, FrameCount, DeviceOrientation, HorizontalFOV, VerticalFOV);
+		UE_LOG(LogSpatialDataDeserializer, Display, TEXT("[SCT] Version: %d, Frames: %d, Device Orientation: %d, Horizontal FOV: %f, Vertical FOV: %f, Focal Length X: %f, Focal Length Y: %f"), Version, FrameCount, DeviceOrientation, HorizontalFOV, VerticalFOV, FocalLengthX, FocalLengthY);
 	}
 
 	void FSpatialDataDeserializer::DeserialiseCamera()

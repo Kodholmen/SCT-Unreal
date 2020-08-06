@@ -28,3 +28,10 @@ To use your captured sessions follow the steps below:
 * Reference the data asset you previously imported by pressing the "File Name Path" ... button.
 * If you want the replay to auto play when previewing the Map, check the "Auto Play" check box. If you want to time your start leave it unchecked and control the start manually from Blueprint. Check the BP_SCTReplayCameraPawn for how Auto Start does it.
 Press play and the camera should replay the recorded session!
+
+## Viewing Session Meta Data
+As part of moving to an import setup is to make it easier to view the session meta data such as camera intrinsics and other information making it easier to match your virtual camera lens with the device used to capture the session.
+Until then, the only way is to press play and check the Log once to get the session info needed to configure a camera. Running the example Map "Camera Replay" will output
+```
+LogSpatialDataDeserializer: Display: [SCT] Version: 202004, Frames: 362, Device Orientation: 3, Horizontal FOV: 62.008614, Vertical FOV: 48.524296, Focal Length X: 1597.436157, Focal Length Y: 1597.436157
+```
