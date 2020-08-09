@@ -68,16 +68,18 @@ void ASCTReplayGeometryActor::Tick(float DeltaTime)
 
 	if (CurrentTick == NextActionTick)
 	{
-		Mesh->ClearAllMeshSections();
-
 		int PartCount = 0;
 		FromBuffer >> PartCount;
+
+		if (PartCount > 0)
+			Mesh->ClearAllMeshSections();
+
 		for (int p = 0; p < PartCount; ++p)
 		{
 			ReadMeshPartFromStream(p);
 		}
 
-		NextActionTick += 300;
+		NextActionTick += 60;
 	}
 
 	++CurrentTick;
