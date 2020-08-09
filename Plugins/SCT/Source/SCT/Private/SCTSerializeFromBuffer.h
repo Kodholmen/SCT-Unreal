@@ -136,12 +136,24 @@ public:
 		if (!Ar.HasOverflow() && Ar.CurrentOffset + 4 <= Ar.NumBytes)
 		{
 			readPod<uint32>(Ar, D);
-			//uint32 D1 = Ar.Data[Ar.CurrentOffset + 0];
-			//uint32 D2 = Ar.Data[Ar.CurrentOffset + 1];
-			//uint32 D3 = Ar.Data[Ar.CurrentOffset + 2];
-			//uint32 D4 = Ar.Data[Ar.CurrentOffset + 3];
-			//D = D1 << 24 | D2 << 16 | D3 << 8 | D4;
 			Ar.CurrentOffset += 4;
+		}
+		else
+		{
+			Ar.bHasOverflowed = true;
+		}
+		return Ar;
+	}
+
+	/**
+	 * Reads an int64 from the buffer
+	 */
+	friend inline FMRSerializeFromBuffer& operator>>(FMRSerializeFromBuffer& Ar, int64& I)
+	{
+		if (!Ar.HasOverflow() && Ar.CurrentOffset + 8 <= Ar.NumBytes)
+		{
+			readPod<int64>(Ar, I);
+			Ar.CurrentOffset += 8;
 		}
 		else
 		{

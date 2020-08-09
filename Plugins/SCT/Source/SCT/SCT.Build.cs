@@ -27,6 +27,7 @@ public class SCT : ModuleRules
 			{
 				"Core",
                 "LiveLinkInterface",
+                "ProceduralMeshComponent",
 				// ... add other public dependencies that you statically link with here ...
 			}
             );
