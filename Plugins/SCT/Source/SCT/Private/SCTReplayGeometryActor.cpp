@@ -26,7 +26,6 @@ SOFTWARE.
 #define LOCTEXT_NAMESPACE "FSCTLiveLinkModule"
 DEFINE_LOG_CATEGORY_STATIC(SCTReplayGeometryActor, Log, All);
 
-// Sets default values
 ASCTReplayGeometryActor::ASCTReplayGeometryActor()
 	: CurrentTick(0)
 	, NextActionTick(0)
@@ -36,7 +35,6 @@ ASCTReplayGeometryActor::ASCTReplayGeometryActor()
 	SetRootComponent(Mesh);
 }
 
-// Called when the game starts or when spawned
 void ASCTReplayGeometryActor::BeginPlay()
 {
 	Super::BeginPlay();
@@ -55,10 +53,17 @@ void ASCTReplayGeometryActor::BeginPlay()
 	}
 }
 
-// Called every frame
+void ASCTReplayGeometryActor::Start()
+{
+	bRunning = true;
+}
+
 void ASCTReplayGeometryActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bRunning == false)
+		return;
 
 	if (FromBuffer.HasOverflow())
 	{
@@ -68,6 +73,8 @@ void ASCTReplayGeometryActor::Tick(float DeltaTime)
 
 	if (CurrentTick == NextActionTick)
 	{
+		FromBuffer >> NextActionTick;
+
 		int PartCount = 0;
 		FromBuffer >> PartCount;
 
@@ -78,8 +85,6 @@ void ASCTReplayGeometryActor::Tick(float DeltaTime)
 		{
 			ReadMeshPartFromStream(p);
 		}
-
-		NextActionTick += 60;
 	}
 
 	++CurrentTick;

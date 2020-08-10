@@ -39,6 +39,9 @@ public:
 	ASCTReplayGeometryActor();
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable, Category = Logic)
+	void Start();
+
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial Settings", meta = (FilePathFilter = "dat", AbsolutePath))
 	FFilePath FileNamePath;
 
@@ -53,6 +56,7 @@ private:
 
 	int CurrentTick;
 	int NextActionTick;
+	bool bRunning = false;
 	TArray<uint8> FileBuffer;
 	FMRSerializeFromBuffer FromBuffer;
 };
