@@ -9,6 +9,7 @@ The data recorded from SCT is saved to a binary file to keep the storage size to
 ```
 202003 - SCT 1.0
 202004 - SCT 1.01
+202005 - SCT 1.03
 ```
 
 ## Structure
@@ -16,12 +17,12 @@ The data recorded from SCT is saved to a binary file to keep the storage size to
 The overall structure is quite simple:
 
 ```
-[Header]  [Frame Data 1] [Frame Data 2] ... [Frame Data n]
+[Header]  [User Anchors]  [Frame Data 1]  [Frame Data 2] ... [Frame Data n]
 ```
 
 In the case of camera tracking only the structure is:
 ```
-[Header]  [Camera Frame 1] [Camera Frame 2] ... [Camera Frame n]
+[Header]  [User Anchors]  [Camera Frame 1] [Camera Frame 2] ... [Camera Frame n]
 ```
 
 When capturing a skeleton  the structure is slightly different as it contains both skeleton *and* camera frames.
@@ -46,6 +47,15 @@ Vertical FOV (float 32 bits) - Vertical Field of View in degrees of the camera l
 Focal Length X (float 32 bits) - Pixel focal length. X and Y are identical for square pixels.
 Focal Length Y (float 32 bits) - Pixel focal length. X and Y are identical for square pixels.
 Capture Type (int 32 bits) - Specifies the type of capture. 0 - Skeleton, 1 - Camera World Tracking
+```
+
+### User Anchors
+The user anchors section contains the locations of all anchors placed by the user when specifying places of high tracking importance.
+The section contains  the following fields:
+
+```
+Anchor Count (int 32 bits) - The number of anchor position the section contains. Simply read this many "Anchor Position"s
+Anchor Postion (float3 96 bits) - Standard 3 component vector describing the anchor position (x, y, z)
 ```
 
 ### Camera Frame

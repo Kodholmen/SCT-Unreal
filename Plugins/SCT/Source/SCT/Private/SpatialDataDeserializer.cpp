@@ -68,7 +68,7 @@ namespace kh
 		FromBuffer >> FocalLengthY;
 		FromBuffer >> CaptureType;
 
-		check(Version == 202004 && "Version Mismatch. Make sure your plugin and App versions match");
+		check(Version == 202005 && "Version Mismatch. Make sure your plugin and App versions match");
 
 		UE_LOG(LogSpatialDataDeserializer, Display, TEXT("[SCT] Version: %d, Frames: %d, Device Orientation: %d, Horizontal FOV: %f, Vertical FOV: %f, Focal Length X: %f, Focal Length Y: %f"), Version, FrameCount, DeviceOrientation, HorizontalFOV, VerticalFOV, FocalLengthX, FocalLengthY);
 	}
@@ -90,6 +90,25 @@ namespace kh
 		CameraTransform.SetLocation(FVector(-Pos.Z, Pos.X, Pos.Y) * 100.0f);
 		//PYR from RPY
 		CameraTransform.SetRotation(FRotator(FMath::RadiansToDegrees(Rot.X), FMath::RadiansToDegrees(-Rot.Y), FMath::RadiansToDegrees(-Rot.Z)).Quaternion());
+	}
+
+	void FSpatialDataDeserializer::DeserializeUserAnchors()
+	{
+		if (bShouldDeserialize == false)
+			return;
+
+		int32 AnchorCount = 0;
+		FromBuffer >> AnchorCount;
+
+		UE_LOG(LogSpatialDataDeserializer, Display, TEXT("[SCT] Found: %d User Anchors"), AnchorCount);
+
+		for (int32 i = 0; i < AnchorCount; ++i)
+		{
+			FVector Pos = FVector::ZeroVector;
+			FromBuffer >> Pos;
+
+			UserAnchors.Anchors.Add(Pos);
+		}
 	}
 
 	void FSpatialDataDeserializer::DeserializeSkeletonDefinition()

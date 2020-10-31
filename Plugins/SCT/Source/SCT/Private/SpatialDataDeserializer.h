@@ -47,6 +47,11 @@ namespace kh
 		double ExposureDuration;
 	};
 
+	struct FUserAnchors
+	{
+		TArray<FVector> Anchors;
+	};
+
 	/**
 	 *
 	 */
@@ -59,6 +64,7 @@ namespace kh
 		void InitWithBuffer(TArray<uint8>& RecvBuffer);
 		void DeserializeHeader();
 		void DeserialiseCamera();
+		void DeserializeUserAnchors();
 		void DeserializeSkeletonDefinition();
 		void DeserialiseSkeleton();
 
@@ -93,6 +99,7 @@ namespace kh
 
 		FTransform CameraTransform;
 		FCameraFrameMetaData CameraMetaData;
+		FUserAnchors UserAnchors;
 
 		FSkeletonDefinition SkeletonDefinition;
 		FSkeletonTransforms SkeletonTransforms;

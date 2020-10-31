@@ -57,6 +57,7 @@ void ASCTReplaySkeletonPawn::BeginPlay()
 		File->Read(FileBuffer.GetData(), File->Size());
 		SpatialData.InitWithBuffer(FileBuffer);
 		SpatialData.DeserializeHeader();
+		SpatialData.DeserializeUserAnchors();
 		SpatialData.DeserializeSkeletonDefinition();
 	}
 }
@@ -85,6 +86,7 @@ void ASCTReplaySkeletonPawn::Tick(float DeltaTime)
 	if (SpatialData.StepFrame(bLoop))
 	{
 		SpatialData.DeserializeHeader();
+		SpatialData.DeserializeUserAnchors();
 		SpatialData.DeserializeSkeletonDefinition();
 	}
 }

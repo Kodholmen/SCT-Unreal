@@ -58,6 +58,7 @@ FSCTLiveLinkSource::FSCTLiveLinkSource()
 		File->Read(FileBuffer.GetData(), File->Size());
 		SpatialData.InitWithBuffer(FileBuffer);
 		SpatialData.DeserializeHeader();
+		SpatialData.DeserializeUserAnchors();
 	}
 
 	// Tick delegate
@@ -229,6 +230,7 @@ void FSCTLiveLinkSource::UpdateLiveLink(float DeltaTime)
 	if (SpatialData.StepFrame())
 	{
 		SpatialData.DeserializeHeader();
+		SpatialData.DeserializeUserAnchors();
 
 		if (bIsBodyTracking)
 		{

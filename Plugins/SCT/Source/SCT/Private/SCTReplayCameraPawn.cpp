@@ -54,6 +54,7 @@ void ASCTReplayCameraPawn::BeginPlay()
 		File->Read(FileBuffer.GetData(), File->Size());
 		SpatialData.InitWithBuffer(FileBuffer);
 		SpatialData.DeserializeHeader();
+		SpatialData.DeserializeUserAnchors();
 	}
 }
 
@@ -72,6 +73,7 @@ void ASCTReplayCameraPawn::Tick(float DeltaTime)
 	if (SpatialData.StepFrame(bLoop))
 	{
 		SpatialData.DeserializeHeader();
+		SpatialData.DeserializeUserAnchors();
 	}
 }
 
