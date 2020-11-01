@@ -221,7 +221,7 @@ void USCTEditorBlueprintLibrary::ReadUserAnchorsFromBuffer(FMRSerializeFromBuffe
 		FVector Pos = FVector::ZeroVector;
 		FromBuffer >> Pos;
 
-		UserAnchors.Add(Pos);
+		UserAnchors.Add(Pos * 100.0f);
 	}
 }
 
