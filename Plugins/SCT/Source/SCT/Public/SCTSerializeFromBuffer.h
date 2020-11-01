@@ -231,6 +231,30 @@ public:
 		return Ar;
 	}
 
+	friend inline FMRSerializeFromBuffer& operator>>(FMRSerializeFromBuffer& Ar, FTransform& Transform)
+	{
+		FPlane C0;
+		FPlane C1;
+		FPlane C2;
+		FPlane C3;
+
+		Ar >> C0;
+		Ar >> C1;
+		Ar >> C2;
+		Ar >> C3;
+
+		FMatrix RawYUpFMatrix(C0, C1, C2, C3);
+
+		// Extract & convert rotation
+		FQuat RawRotation(RawYUpFMatrix);
+		FQuat Rotation(-RawRotation.Z, RawRotation.X, RawRotation.Y, -RawRotation.W);
+
+		Transform.SetLocation(FVector(-RawYUpFMatrix.M[3][2], RawYUpFMatrix.M[3][0], RawYUpFMatrix.M[3][1]) * 100.0f);
+		Transform.SetRotation(Rotation);
+
+		return Ar;
+	}
+
 	/**
 	 * Reads a FString from the buffer
 	 */
@@ -278,6 +302,18 @@ public:
 		FString NameString;
 		Ar >> NameString;
 		Name = FName(*NameString);
+		return Ar;
+	}
+
+	/**
+	 * Reads the rest of the buffer to an array
+	 */
+	friend inline FMRSerializeFromBuffer& operator>>(FMRSerializeFromBuffer& Ar, TArray<uint8>& Array)
+	{
+		uint32 NumToRead = Ar.NumBytes - Ar.CurrentOffset;
+		Array.AddUninitialized(NumToRead);
+		Ar.ReadBinary(Array.GetData(), NumToRead);
+
 		return Ar;
 	}
 

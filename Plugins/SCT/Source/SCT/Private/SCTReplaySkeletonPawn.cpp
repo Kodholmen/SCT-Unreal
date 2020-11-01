@@ -47,18 +47,9 @@ void ASCTReplaySkeletonPawn::BeginPlay()
 
 	PrimaryActorTick.TickInterval = 1.0f / 60.0f;
 
-	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	IFileHandle* File = PlatformFile.OpenRead(*FileNamePath.FilePath);
-	if (File)
+	if (SkeletonDataAsset)
 	{
-		UE_LOG(SCTReplaySkeletonPawn, Display, TEXT("[SCT ReplaySkeleton] Opened Replay File with size: %d"), File->Size());
- 
-		FileBuffer.AddZeroed(File->Size());
-		File->Read(FileBuffer.GetData(), File->Size());
-		SpatialData.InitWithBuffer(FileBuffer);
-		SpatialData.DeserializeHeader();
-		SpatialData.DeserializeUserAnchors();
-		SpatialData.DeserializeSkeletonDefinition();
+ 		SpatialData.InitWithSkeletonAsset(SkeletonDataAsset);
 	}
 }
 
@@ -76,19 +67,14 @@ void ASCTReplaySkeletonPawn::Tick(float DeltaTime)
 	for (int i = 0, e = SkeletonTransforms.Transforms.Num(); i < e; ++i)
 	{
 		FTransform JointTrans = SkeletonTransforms.Transforms[i];
-		DrawDebugSphere(GetWorld(), JointTrans.GetLocation(), 5.0f, 12, FColor::White, true);
+		DrawDebugSphere(GetWorld(), JointTrans.GetLocation(), 5.0f, 12, FColor::White, false);
 	}
 
 	//FTransform CameraTransform = SpatialData.GetCameraTransform();
 	//CameraAnchor->SetRelativeTransform(CameraTransform);
 
 
-	if (SpatialData.StepFrame(bLoop))
-	{
-		SpatialData.DeserializeHeader();
-		SpatialData.DeserializeUserAnchors();
-		SpatialData.DeserializeSkeletonDefinition();
-	}
+	SpatialData.StepFrame(bLoop);
 }
 
 void ASCTReplaySkeletonPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

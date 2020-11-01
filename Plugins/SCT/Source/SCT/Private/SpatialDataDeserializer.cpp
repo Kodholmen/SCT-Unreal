@@ -30,14 +30,8 @@ namespace kh
 	FSpatialDataDeserializer::FSpatialDataDeserializer()
 		: bShouldDeserialize(true)
 		, CurrFrame(0)
-		, Version(0)
 		, FrameCount(0)
 		, DeviceOrientation(0)
-		, HorizontalFOV(0.0f)
-		, VerticalFOV(0.0f)
-		, FocalLengthX(0.0f)
-		, FocalLengthY(0.0f)
-		, CameraTransform()
 	{
 		CameraTransform.SetLocation(FVector::ZeroVector);
 		CameraTransform.SetRotation(FQuat::Identity);
@@ -48,29 +42,19 @@ namespace kh
 	{
 	}
 
-	void FSpatialDataDeserializer::InitWithBuffer(TArray<uint8>& RecvBuffer)
+	void FSpatialDataDeserializer::InitWithCameraAsset(class USCTSpatialCameraAsset* Asset)
 	{
-		FromBuffer.Init(RecvBuffer.GetData(), RecvBuffer.Num());
+		FrameCount = Asset->FrameCount;
+		DeviceOrientation = Asset->DeviceOrientation;
+		FromBuffer.Init(Asset->FrameData.GetData(), Asset->FrameData.Num());
 	}
 
-	void FSpatialDataDeserializer::DeserializeHeader()
+	void FSpatialDataDeserializer::InitWithSkeletonAsset(USCTSpatialSkeletonAsset* Asset)
 	{
-		Version = 0;
-		FrameCount = 0;
-		DeviceOrientation = 0;
+		InitWithCameraAsset(Asset);
+		SkeletonDefinition = Asset->SkeletonDefinition;
 
-		FromBuffer >> Version;
-		FromBuffer >> FrameCount;
-		FromBuffer >> DeviceOrientation;
-		FromBuffer >> HorizontalFOV;
-		FromBuffer >> VerticalFOV;
-		FromBuffer >> FocalLengthX;
-		FromBuffer >> FocalLengthY;
-		FromBuffer >> CaptureType;
-
-		check(Version == 202005 && "Version Mismatch. Make sure your plugin and App versions match");
-
-		UE_LOG(LogSpatialDataDeserializer, Display, TEXT("[SCT] Version: %d, Frames: %d, Device Orientation: %d, Horizontal FOV: %f, Vertical FOV: %f, Focal Length X: %f, Focal Length Y: %f"), Version, FrameCount, DeviceOrientation, HorizontalFOV, VerticalFOV, FocalLengthX, FocalLengthY);
+		SkeletonTransforms.Transforms.AddDefaulted(SkeletonDefinition.JointNames.Num());
 	}
 
 	void FSpatialDataDeserializer::DeserialiseCamera()
@@ -92,66 +76,6 @@ namespace kh
 		CameraTransform.SetRotation(FRotator(FMath::RadiansToDegrees(Rot.X), FMath::RadiansToDegrees(-Rot.Y), FMath::RadiansToDegrees(-Rot.Z)).Quaternion());
 	}
 
-	void FSpatialDataDeserializer::DeserializeUserAnchors()
-	{
-		if (bShouldDeserialize == false)
-			return;
-
-		int32 AnchorCount = 0;
-		FromBuffer >> AnchorCount;
-
-		UE_LOG(LogSpatialDataDeserializer, Display, TEXT("[SCT] Found: %d User Anchors"), AnchorCount);
-
-		for (int32 i = 0; i < AnchorCount; ++i)
-		{
-			FVector Pos = FVector::ZeroVector;
-			FromBuffer >> Pos;
-
-			UserAnchors.Anchors.Add(Pos);
-		}
-	}
-
-	void FSpatialDataDeserializer::DeserializeSkeletonDefinition()
-	{
-		if (bShouldDeserialize == false)
-			return;
-
-		SkeletonDefinition.JointNames.Empty();
-		SkeletonDefinition.ParentIndices.Empty();
-		SkeletonDefinition.NeutralTransforms.Empty();
-		SkeletonTransforms.Transforms.Empty();
-
-		int JointCount = 0;
-		FromBuffer >> JointCount;
-
-		for (int i = 0; i < JointCount; ++i)
-		{
-			FString JointName;
-			FromBuffer >> JointName;
-
-			SkeletonDefinition.JointNames.Add(FName(JointName));
-		}
-
-		int ParentCount = 0;
-		FromBuffer >> ParentCount;
-
-		for (int i = 0; i < ParentCount; ++i)
-		{
-			int32 ParentIdx = -1;
-			FromBuffer >> ParentIdx;
-
-			SkeletonDefinition.ParentIndices.Add(ParentIdx);
-		}
-
-		for (int i = 0; i < JointCount; ++i)
-		{
-			FTransform Trans = DeserializeTransform();
-			SkeletonDefinition.NeutralTransforms.Add(Trans);
-		}
-
-		SkeletonTransforms.Transforms.AddDefaulted(JointCount);
-	}
-
 	void FSpatialDataDeserializer::DeserialiseSkeleton()
 	{
 		if (bShouldDeserialize == false)
@@ -165,21 +89,9 @@ namespace kh
 		{
 			for (int i = 0, e = SkeletonDefinition.ParentIndices.Num(); i<e; ++i)
 			{
-				SkeletonTransforms.Transforms[i] = DeserializeTransform();
+				FromBuffer >> SkeletonTransforms.Transforms[i];
 			}
 		}
-	}
-
-	void FSpatialDataDeserializer::DeserialiseCamera(TArray<uint8>& RecvBuffer)
-	{
-		InitWithBuffer(RecvBuffer);
-		DeserialiseCamera();
-	}
-
-	void FSpatialDataDeserializer::DeserialiseSkeleton(TArray<uint8>& RecvBuffer)
-	{
-		InitWithBuffer(RecvBuffer);
-		DeserialiseSkeleton();
 	}
 
 	bool FSpatialDataDeserializer::StepFrame(bool bLoop)
@@ -214,7 +126,7 @@ namespace kh
 		return CameraMetaData;
 	}
 
-	const FSkeletonDefinition& FSpatialDataDeserializer::GetSkeletonDefinition() const
+	const FSCTSkeletonDefinition& FSpatialDataDeserializer::GetSkeletonDefinition() const
 	{
 		return SkeletonDefinition;
 	}
@@ -227,33 +139,5 @@ namespace kh
 	const int32 FSpatialDataDeserializer::GetDeviceOrientation() const
 	{
 		return DeviceOrientation;
-	}
-
-	FTransform FSpatialDataDeserializer::DeserializeTransform()
-	{
-		//UE_LOG(LogSpatialDataDeserializer, Display, TEXT("[MR LIVELINK] Deserializing frame %d"), CurrFrame);
-
-		FPlane C0;
-		FPlane C1;
-		FPlane C2;
-		FPlane C3;
-		FromBuffer >> C0;
-		FromBuffer >> C1;
-		FromBuffer >> C2;
-		FromBuffer >> C3;
-
-		FMatrix RawYUpFMatrix(C0, C1, C2, C3);
-
-		// Extract & convert rotation
-		FQuat RawRotation(RawYUpFMatrix);
-		FQuat Rotation(-RawRotation.Z, RawRotation.X, RawRotation.Y, -RawRotation.W);
-
-		FTransform Transform;
-		Transform.SetLocation(FVector(-RawYUpFMatrix.M[3][2], RawYUpFMatrix.M[3][0], RawYUpFMatrix.M[3][1]) * 100.0f);
-		Transform.SetRotation(Rotation);
-		
-		check(Transform.IsValid());
-
-		return Transform;
 	}
 }

@@ -26,6 +26,7 @@ SOFTWARE.
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "SpatialDataDeserializer.h"
+#include "SCTSpatialCameraAsset.h"
 
 #include "SCTReplayCameraPawn.generated.h"
 
@@ -39,8 +40,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial Settings", meta = (FilePathFilter = "dat", AbsolutePath))
-	FFilePath FileNamePath;
+	UPROPERTY(EditAnywhere, Category = "Spatial Settings")
+	USCTSpatialCameraAsset* CameraDataAsset;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Spatial Settings")
 	bool bLoop = false;
@@ -52,7 +53,6 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	TArray<uint8> FileBuffer;
 	kh::FSpatialDataDeserializer SpatialData;
 	bool bRunning = false;
 };

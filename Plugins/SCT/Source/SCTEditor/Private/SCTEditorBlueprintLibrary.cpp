@@ -24,50 +24,30 @@ SOFTWARE.
 #include "SCTEditorBlueprintLibrary.h"
 
 #include "SCTSerializeFromBuffer.h"
+#include "SCTSpatialCameraAsset.h"
+#include "SCTSpatialSkeletonAsset.h"
 #include "EditorLevelLibrary.h"
 #include "Engine/BoxReflectionCapture.h"
 
 #include "DesktopPlatform/Public/IDesktopPlatform.h"
 #include "DesktopPlatform/Public/DesktopPlatformModule.h"
 
+#include "AssetRegistryModule.h"
+#include "Misc/PackageName.h"
 
 DEFINE_LOG_CATEGORY_STATIC(SCTEditorBlueprintLibrary, Log, All);
 
 void USCTEditorBlueprintLibrary::ImportEnvironmentProbes()
 {
-	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
-	const void* ParentWindowWindowHandle = FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr);
-
 	const FString Title = TEXT("Import Environment Anchors");
 	const FString FileTypes = TEXT("SCT Data (*.dat)|*.dat");
+	TArray<uint8> FileBuffer;
 
-	TArray<FString> OutFilenames;
-	DesktopPlatform->OpenFileDialog(
-		ParentWindowWindowHandle,
-		Title,
-		TEXT(""),
-		TEXT("environment.dat"),
-		FileTypes,
-		EFileDialogFlags::None,
-		OutFilenames
-	);
+	ReadFileWithDialog(Title, FileTypes, "environmentprobes.dat", FileBuffer);
 
-	if (OutFilenames.Num() == 0)
+	if (FileBuffer.Num())
 	{
-		return;
-	}
-
-	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	IFileHandle* File = PlatformFile.OpenRead(*OutFilenames[0]);
-	if (File)
-	{
-		UE_LOG(SCTEditorBlueprintLibrary, Display, TEXT("[SCT Editor Blueprint] Opened Replay File with size: %d"), File->Size());
-
-		TArray<uint8> FileBuffer;
 		FMRSerializeFromBuffer FromBuffer;
-
-		FileBuffer.AddZeroed(File->Size());
-		File->Read(FileBuffer.GetData(), File->Size());
 		FromBuffer.Init(FileBuffer.GetData(), FileBuffer.Num());
 
 		int32 AnchorCount;
@@ -114,3 +94,241 @@ void USCTEditorBlueprintLibrary::ImportEnvironmentProbes()
 
 }
 
+void USCTEditorBlueprintLibrary::ImportSpatialCamera()
+{
+	TArray<uint8> FileBuffer;
+	{
+		const FString Title = TEXT("Import Spatial Camera");
+		const FString FileTypes = TEXT("SCT Data (*.dat)|*.dat");
+		ReadFileWithDialog(Title, FileTypes, "capture.dat", FileBuffer);
+	}
+
+	if (FileBuffer.Num() == 0)
+		return;
+
+	FMRSerializeFromBuffer FromBuffer;
+	FromBuffer.Init(FileBuffer.GetData(), FileBuffer.Num());
+
+	// Header
+	FSpatialHeader Header;
+	ReadHeaderFromBuffer(FromBuffer, Header);
+
+	// User Anchors
+	TArray<FVector> UserAnchors;
+	ReadUserAnchorsFromBuffer(FromBuffer, UserAnchors);
+
+	// Frame Data
+	TArray<uint8> FrameData;
+	FromBuffer >> FrameData;
+	UE_LOG(SCTEditorBlueprintLibrary, Display, TEXT("[SCT Editor Blueprint] Read frame data: %d"), FrameData.Num());
+
+	FString AssetFileName = "";
+	{
+		const FString Title = TEXT("Save Spatial Camera Asset");
+		const FString FileTypes = TEXT("Data Asset (*.uasset)|*.uasset");
+		if (ChooseSaveLocationWithDialog(Title, FileTypes, "Capture.uasset", AssetFileName) == false)
+			return;
+	}
+
+	// Create Data Asset
+	FString PackageName  = FPackageName::FilenameToLongPackageName(AssetFileName);
+	FString ShortName = FPackageName::GetShortName(PackageName);
+	UPackage* Package = CreatePackage(nullptr, *PackageName);
+	USCTSpatialCameraAsset* Asset = NewObject<USCTSpatialCameraAsset>(Package, USCTSpatialCameraAsset::StaticClass(), *ShortName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+
+	PopulateSpatialCameraAsset(Asset, Header, UserAnchors, FrameData);
+
+	FAssetRegistryModule::AssetCreated(Asset);
+	Asset->MarkPackageDirty();
+	UPackage::SavePackage(Package, Asset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetFileName);
+}
+
+void USCTEditorBlueprintLibrary::ImportSpatialSkeleton()
+{
+	TArray<uint8> FileBuffer;
+	{
+		const FString Title = TEXT("Import Spatial Skeleton");
+		const FString FileTypes = TEXT("SCT Data (*.dat)|*.dat");
+		ReadFileWithDialog(Title, FileTypes, "capture.dat", FileBuffer);
+	}
+
+	if (FileBuffer.Num() == 0)
+		return;
+
+	FMRSerializeFromBuffer FromBuffer;
+	FromBuffer.Init(FileBuffer.GetData(), FileBuffer.Num());
+
+	// Header
+	FSpatialHeader Header;
+	ReadHeaderFromBuffer(FromBuffer, Header);
+
+	// User Anchors
+	TArray<FVector> UserAnchors;
+	ReadUserAnchorsFromBuffer(FromBuffer, UserAnchors);
+
+	// Skeleton Definition
+	FSCTSkeletonDefinition SkeletonDefinition;
+	ReadSkeletonDefinitionFromBuffer(FromBuffer, SkeletonDefinition);
+
+	// Frame Data
+	TArray<uint8> FrameData;
+	FromBuffer >> FrameData;
+	UE_LOG(SCTEditorBlueprintLibrary, Display, TEXT("[SCT Editor Blueprint] Read frame data: %d"), FrameData.Num());
+
+	FString AssetFileName = "";
+	{
+		const FString Title = TEXT("Save Spatial Skeleton Asset");
+		const FString FileTypes = TEXT("Data Asset (*.uasset)|*.uasset");
+		if (ChooseSaveLocationWithDialog(Title, FileTypes, "SkeletonCapture.uasset", AssetFileName) == false)
+			return;
+	}
+
+	// Create Data Asset
+	FString PackageName = FPackageName::FilenameToLongPackageName(AssetFileName);
+	FString ShortName = FPackageName::GetShortName(PackageName);
+	UPackage* Package = CreatePackage(nullptr, *PackageName);
+	USCTSpatialSkeletonAsset* Asset = NewObject<USCTSpatialSkeletonAsset>(Package, USCTSpatialSkeletonAsset::StaticClass(), *ShortName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+
+	PopulateSpatialCameraAsset(Asset, Header, UserAnchors, FrameData);
+	Asset->SkeletonDefinition = SkeletonDefinition;
+
+	FAssetRegistryModule::AssetCreated(Asset);
+	Asset->MarkPackageDirty();
+	UPackage::SavePackage(Package, Asset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetFileName);
+}
+
+void USCTEditorBlueprintLibrary::ReadHeaderFromBuffer(FMRSerializeFromBuffer& FromBuffer, FSpatialHeader& Header)
+{
+	FromBuffer >> Header.Version;
+	FromBuffer >> Header.FrameCount;
+	FromBuffer >> Header.DeviceOrientation;
+	FromBuffer >> Header.HorizontalFOV;
+	FromBuffer >> Header.VerticalFOV;
+	FromBuffer >> Header.FocalLengthX;
+	FromBuffer >> Header.FocalLengthY;
+	FromBuffer >> Header.CaptureType;
+
+	check(Header.Version == 202005 && "Version Mismatch. Make sure your plugin and App versions match");
+}
+
+void USCTEditorBlueprintLibrary::ReadUserAnchorsFromBuffer(FMRSerializeFromBuffer& FromBuffer, TArray<FVector>& UserAnchors)
+{
+	int32 AnchorCount = 0;
+	FromBuffer >> AnchorCount;
+
+	for (int32 i = 0; i < AnchorCount; ++i)
+	{
+		FVector Pos = FVector::ZeroVector;
+		FromBuffer >> Pos;
+
+		UserAnchors.Add(Pos);
+	}
+}
+
+void USCTEditorBlueprintLibrary::ReadSkeletonDefinitionFromBuffer(FMRSerializeFromBuffer& FromBuffer, FSCTSkeletonDefinition& SkeletonDefinition)
+{
+	SkeletonDefinition.JointNames.Empty();
+	SkeletonDefinition.ParentIndices.Empty();
+	SkeletonDefinition.NeutralTransforms.Empty();
+
+	int JointCount = 0;
+	FromBuffer >> JointCount;
+
+	for (int i = 0; i < JointCount; ++i)
+	{
+		FString JointName;
+		FromBuffer >> JointName;
+
+		SkeletonDefinition.JointNames.Add(FName(JointName));
+	}
+
+	int ParentCount = 0;
+	FromBuffer >> ParentCount;
+
+	for (int i = 0; i < ParentCount; ++i)
+	{
+		int32 ParentIdx = -1;
+		FromBuffer >> ParentIdx;
+
+		SkeletonDefinition.ParentIndices.Add(ParentIdx);
+	}
+
+	for (int i = 0; i < JointCount; ++i)
+	{
+		FTransform Trans;
+		FromBuffer >> Trans;
+		SkeletonDefinition.NeutralTransforms.Add(Trans);
+	}
+}
+
+void USCTEditorBlueprintLibrary::PopulateSpatialCameraAsset(USCTSpatialCameraAsset* Asset, const FSpatialHeader& Header, const TArray<FVector>& UserAnchors, const TArray<uint8>& FrameData)
+{
+	Asset->Version = Header.Version;
+	Asset->FrameCount = Header.FrameCount;
+	Asset->DeviceOrientation = Header.DeviceOrientation;
+	Asset->HorizontalFOV = Header.HorizontalFOV;
+	Asset->VerticalFOV = Header.VerticalFOV;
+	Asset->FocalLengthX = Header.FocalLengthX;
+	Asset->FocalLengthY = Header.FocalLengthY;
+	Asset->CaptureType = Header.CaptureType;
+
+	Asset->UserAnchors = UserAnchors;
+	Asset->FrameData = FrameData;
+}
+
+void USCTEditorBlueprintLibrary::ReadFileWithDialog(const FString& Title, const FString& FileTypes, const FString& DefaultFileName, TArray<uint8>& FileBuffer)
+{
+	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	const void* ParentWindowWindowHandle = FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr);
+
+	TArray<FString> OutFilenames;
+	DesktopPlatform->OpenFileDialog(
+		ParentWindowWindowHandle,
+		Title,
+		TEXT(""),
+		*DefaultFileName,
+		FileTypes,
+		EFileDialogFlags::None,
+		OutFilenames
+	);
+
+	if (OutFilenames.Num() == 0)
+	{
+		return;
+	}
+
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	IFileHandle* File = PlatformFile.OpenRead(*OutFilenames[0]);
+	if (File)
+	{
+		UE_LOG(SCTEditorBlueprintLibrary, Display, TEXT("[SCT Editor Blueprint] Opened File with size: %d"), File->Size());
+
+		FileBuffer.AddZeroed(File->Size());
+		File->Read(FileBuffer.GetData(), File->Size());
+	}
+}
+
+bool USCTEditorBlueprintLibrary::ChooseSaveLocationWithDialog(const FString& Title, const FString& FileTypes, const FString& DefaultFileName, FString& FileName)
+{
+	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	const void* ParentWindowWindowHandle = FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr);
+
+	TArray<FString> OutFilenames;
+	DesktopPlatform->SaveFileDialog(
+		ParentWindowWindowHandle,
+		Title,
+		TEXT(""),
+		*DefaultFileName,
+		FileTypes,
+		EFileDialogFlags::None,
+		OutFilenames
+	);
+
+	if (OutFilenames.Num() == 0)
+	{
+		return false;
+	}
+
+	FileName = OutFilenames[0];
+	return true;
+}

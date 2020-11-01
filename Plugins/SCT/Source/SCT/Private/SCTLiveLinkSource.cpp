@@ -37,7 +37,6 @@ DEFINE_LOG_CATEGORY_STATIC(LogSCTLiveLinkSource, Log, All);
 
 // TEMP
 static bool bIsBodyTracking = false;
-TArray<uint8> FileBuffer;
 
 FSCTLiveLinkSource::FSCTLiveLinkSource()
 {
@@ -46,19 +45,11 @@ FSCTLiveLinkSource::FSCTLiveLinkSource()
 	SourceType = LOCTEXT("SCTLiveLinkSourceType", "SCT LiveLink");
 	SourceMachineName = LOCTEXT("SCTLiveLinkSourceMachineName", "localhost");
 
-	// TEMP LOAD CAPTURE FROM FILE
-	FString FileName = FString("E:\\projects\\private\\MovieReality\\arkitcapture.dat");
-	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	IFileHandle* File = PlatformFile.OpenRead(*FileName);
-	if (File)
+	// Disabled for now. Should read from network. Keeping the code compiling for testing purposes
+	USCTSpatialCameraAsset* CameraAsset = nullptr;
+	if (CameraAsset)
 	{
-		UE_LOG(LogSCTLiveLinkSource, Display, TEXT("[SCT LIVELINK] Opened Replay File with size: %d"), File->Size());
-
-		FileBuffer.AddZeroed(File->Size());
-		File->Read(FileBuffer.GetData(), File->Size());
-		SpatialData.InitWithBuffer(FileBuffer);
-		SpatialData.DeserializeHeader();
-		SpatialData.DeserializeUserAnchors();
+		SpatialData.InitWithCameraAsset(CameraAsset);
 	}
 
 	// Tick delegate
@@ -120,8 +111,7 @@ void FSCTLiveLinkSource::UpdateBaseStaticData(FLiveLinkBaseStaticData& InOutData
 
 void FSCTLiveLinkSource::UpdateSkeletonStaticData(FLiveLinkSkeletonStaticData& InOutData)
 {
-	SpatialData.DeserializeSkeletonDefinition();
-	const kh::FSkeletonDefinition& Def = SpatialData.GetSkeletonDefinition();
+	const FSCTSkeletonDefinition& Def = SpatialData.GetSkeletonDefinition();
 	InOutData.SetBoneNames(Def.JointNames);
 	InOutData.SetBoneParents(Def.ParentIndices);
 }
@@ -147,7 +137,7 @@ void FSCTLiveLinkSource::UpdateSkeletonFrameData(FLiveLinkAnimationFrameData& In
 
 	SpatialData.DeserialiseSkeleton();
 	TArray<FTransform> BoneTransforms;
-	const kh::FSkeletonDefinition& SkeletonDefinition = SpatialData.GetSkeletonDefinition();
+	const FSCTSkeletonDefinition& SkeletonDefinition = SpatialData.GetSkeletonDefinition();
 	const kh::FSkeletonTransforms& SkeletonTransforms = SpatialData.GetSkeletonTransforms();
 
 	for (int i = 0, e = SkeletonTransforms.Transforms.Num(); i < e; ++i)
@@ -227,16 +217,7 @@ void FSCTLiveLinkSource::UpdateLiveLink(float DeltaTime)
 		LiveLinkClient->PushSubjectFrameData_AnyThread(SubjectKey, MoveTemp(FrameDataStruct));
 	}
 
-	if (SpatialData.StepFrame())
-	{
-		SpatialData.DeserializeHeader();
-		SpatialData.DeserializeUserAnchors();
-
-		if (bIsBodyTracking)
-		{
-			SpatialData.DeserializeSkeletonDefinition();
-		}
-	}
+	SpatialData.StepFrame();
 }
 
 #undef LOCTEXT_NAMESPACE

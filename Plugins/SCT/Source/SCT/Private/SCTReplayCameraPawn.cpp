@@ -44,17 +44,9 @@ void ASCTReplayCameraPawn::BeginPlay()
 
 	PrimaryActorTick.TickInterval = 1.0f / 60.0f;
 
-	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	IFileHandle* File = PlatformFile.OpenRead(*FileNamePath.FilePath);
-	if (File)
+	if (CameraDataAsset)
 	{
-		UE_LOG(SCTReplayCameraPawn, Display, TEXT("[SCT ReplayCamera] Opened Replay File with size: %d"), File->Size());
-
-		FileBuffer.AddZeroed(File->Size());
-		File->Read(FileBuffer.GetData(), File->Size());
-		SpatialData.InitWithBuffer(FileBuffer);
-		SpatialData.DeserializeHeader();
-		SpatialData.DeserializeUserAnchors();
+		SpatialData.InitWithCameraAsset(CameraDataAsset);
 	}
 }
 
@@ -70,17 +62,12 @@ void ASCTReplayCameraPawn::Tick(float DeltaTime)
 	FTransform CameraTransform = SpatialData.GetCameraTransform();
 	SetActorRelativeTransform(CameraTransform);
 
-	if (SpatialData.StepFrame(bLoop))
-	{
-		SpatialData.DeserializeHeader();
-		SpatialData.DeserializeUserAnchors();
-	}
+	SpatialData.StepFrame(bLoop);
 }
 
 void ASCTReplayCameraPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 #undef LOCTEXT_NAMESPACE

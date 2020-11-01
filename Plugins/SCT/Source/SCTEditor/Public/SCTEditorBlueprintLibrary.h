@@ -28,6 +28,10 @@ SOFTWARE.
 
 #include "SCTEditorBlueprintLibrary.generated.h"
 
+class FMRSerializeFromBuffer;
+class USCTSpatialCameraAsset;
+struct FSCTSkeletonDefinition;
+
 UCLASS()
 class SCTEDITOR_API USCTEditorBlueprintLibrary : public UBlueprintFunctionLibrary
 {
@@ -37,4 +41,32 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Editor Scripting | SCT", meta = (DevelopmentOnly))
 	static void ImportEnvironmentProbes();
+
+	UFUNCTION(BlueprintCallable, Category = "Editor Scripting | SCT", meta = (DevelopmentOnly))
+	static void ImportSpatialCamera();
+
+	UFUNCTION(BlueprintCallable, Category = "Editor Scripting | SCT", meta = (DevelopmentOnly))
+	static void ImportSpatialSkeleton();
+
+private:
+	struct FSpatialHeader
+	{
+		int32 Version;
+		int32 FrameCount;
+		int32 DeviceOrientation;
+		float HorizontalFOV;
+		float VerticalFOV;
+		float FocalLengthX;
+		float FocalLengthY;
+		int CaptureType;
+	};
+
+	static void ReadHeaderFromBuffer(FMRSerializeFromBuffer& FromBuffer, FSpatialHeader& Header);
+	static void ReadUserAnchorsFromBuffer(FMRSerializeFromBuffer& FromBuffer, TArray<FVector>& UserAnchors);
+	static void ReadSkeletonDefinitionFromBuffer(FMRSerializeFromBuffer& FromBuffer, FSCTSkeletonDefinition& SkeletonDefinition);
+
+	static void PopulateSpatialCameraAsset(USCTSpatialCameraAsset* Asset, const FSpatialHeader& Header, const TArray<FVector>& UserAnchors, const TArray<uint8>& FrameData);
+	
+	static void ReadFileWithDialog(const FString& Title, const FString& FileTypes, const FString& DefaultFileName, TArray<uint8>& FileBuffer);
+	static bool ChooseSaveLocationWithDialog(const FString& Title, const FString& FileTypes, const FString& DefaultFileName, FString& FileName);
 };

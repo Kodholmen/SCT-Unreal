@@ -39,13 +39,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial Settings", meta = (FilePathFilter = "dat", AbsolutePath))
-		FFilePath FileNamePath;
+	UPROPERTY(EditAnywhere, Category = "Spatial Settings")
+	USCTSpatialSkeletonAsset* SkeletonDataAsset;
+
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Spatial Settings")
-		bool bLoop = false;
+	bool bLoop = false;
 
 	UFUNCTION(BlueprintCallable, Category = Logic)
-		void Start();
+	void Start();
 
 	FTransform GetRelativeTransformByIndex(int index);
 	FTransform GetCameraTransform();
@@ -54,7 +55,6 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	TArray<uint8> FileBuffer;
 	kh::FSpatialDataDeserializer SpatialData;
 	bool bRunning = false;
 };
