@@ -30,29 +30,29 @@ SOFTWARE.
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class SCT_API USCTSpatialCameraAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "Header")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Header")
 	int32 Version;
-	UPROPERTY(EditDefaultsOnly, Category = "Header")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Header")
 	int32 FrameCount;
-	UPROPERTY(EditDefaultsOnly, Category = "Header")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Header")
 	int32 DeviceOrientation;
-	UPROPERTY(EditDefaultsOnly, Category = "Header")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Header")
 	float HorizontalFOV;
-	UPROPERTY(EditDefaultsOnly, Category = "Header")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Header")
 	float VerticalFOV;
-	UPROPERTY(EditDefaultsOnly, Category = "Header")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Header")
 	float FocalLengthX;
-	UPROPERTY(EditDefaultsOnly, Category = "Header")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Header")
 	float FocalLengthY;
-	UPROPERTY(EditDefaultsOnly, Category = "Header")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Header")
 	int CaptureType;
-	UPROPERTY(EditDefaultsOnly, Category = "Header")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Header")
 	TArray<FVector> UserAnchors;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Data")
