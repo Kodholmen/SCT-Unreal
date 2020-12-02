@@ -37,7 +37,7 @@ To use your captured sessions follow the steps below:
 * Attach the Blueprint to the empty Actor you placed in the first step. Make the local position 0/0/0 to make it more clear where the camera replay will originate from.
 * Select the BP_SCTReplayCameraPawn and view the properties.
 
-![Alt text](Documentation/SpatialCameraPlayer_Properties.png?raw=true "Properties")
+![Alt text](Documentation/SpatialCameraPlayer_Properties.PNG?raw=true "Properties")
 
 * Reference the data asset you previously imported by pressing the dropdown next to the "Camera Data Asset" property.
 * If you want the replay to auto play when previewing the Map, check the "Auto Play" check box. If you want to time your start leave it unchecked and control the start manually from Blueprint. Check the BP_SCTReplayCameraPawn for how Auto Start does it.
