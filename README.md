@@ -20,7 +20,15 @@ The current release supports replay of Camera and Skeleton sessions. See the bun
 The first thing you want to do is to transfer the session you want to use from the iPhone/iPad onto the computer you are running Unreal on by going into the share view in SCT and use any of the standard sharing mechanism.
 You can also use the "Files" application on your device to find/view/share the files.
 
-Place the files anywhere you want. It doesn't have to be under the project folder structure as the files are currently referenced as relative paths from the plugin. This will change in future versions to an import mechanism storing the data as a Data asset that can be packaged in build.
+Place the files anywhere you want. It doesn't have to be under the project folder structure as you will import the data to a ScriptableObject asset by following the steps below:
+* Launch the SCT Editor Tools Widget by navigating to "SCT Content/Editor" in the Content Browser and right click on the SCTEditorTools Widget and select "Run Editor Utility Widget"
+
+![Alt text](Documentation/SCTEditorUtilityWidget_launch.png?raw=true "Editor Widget")
+![Alt text](Documentation/SCTEditorUtilityWidget_ui.png?raw=true "Editor Widget")
+
+* Place or dock the panel where you want
+* Press the "Import Spatial Camera" button and browse to the capture file you want to import
+* Select a destination _within_ the project structure to place the imported asset
 
 ## Replay a captured session
 To use your captured sessions follow the steps below:
@@ -28,14 +36,30 @@ To use your captured sessions follow the steps below:
 * Place an instance of the "BP_SCTReplayCameraPawn" Blueprint located under SCT Content/Blueprints in the scene.
 * Attach the Blueprint to the empty Actor you placed in the first step. Make the local position 0/0/0 to make it more clear where the camera replay will originate from.
 * Select the BP_SCTReplayCameraPawn and view the properties.
-![Alt text](Documentation/SpatialCameraPlayer_Properties.PNG?raw=true "Properties")
-* Reference the data asset you previously imported by pressing the "File Name Path" ... button.
+
+![Alt text](Documentation/SpatialCameraPlayer_Properties.png?raw=true "Properties")
+
+* Reference the data asset you previously imported by pressing the dropdown next to the "Camera Data Asset" property.
 * If you want the replay to auto play when previewing the Map, check the "Auto Play" check box. If you want to time your start leave it unchecked and control the start manually from Blueprint. Check the BP_SCTReplayCameraPawn for how Auto Start does it.
 Press play and the camera should replay the recorded session!
 
 ## Viewing Session Meta Data
-As part of moving to an import setup is to make it easier to view the session meta data such as camera intrinsics and other information making it easier to match your virtual camera lens with the device used to capture the session.
-Until then, the only way is to press play and check the Log once to get the session info needed to configure a camera. Running the example Map "Camera Replay" will output
-```
-LogSpatialDataDeserializer: Display: [SCT] Version: 202004, Frames: 362, Device Orientation: 3, Horizontal FOV: 62.008614, Vertical FOV: 48.524296, Focal Length X: 1597.436157, Focal Length Y: 1597.436157
-```
+Once you've imported a session it's easy to view details about the session to see properties such as the camera's FOV. Simply navigate to the asset in the Content Browser and double click the asset.
+
+![Alt text](Documentation/SCT_ReplayCamera_Asset.png?raw=true "Session Asset")
+
+Use the details to view the session meta data such as camera intrinsics and other information making it easier to match your virtual camera lens with the device used to capture the session.
+
+## Import User Anchors
+Once you have imported a session you can easily import any available User Anchors to the scene:
+* Open the scene you want to import the anchors to
+* Navigate to the data asset in the Content Browser
+* Right click the asset and select the "Scripted Actions / Spawn Use Anchors" option
+* The World Outliner should show the newly created anchors as Empty Actors that you can attach other Actors to
+
+## Import Environment Probes
+SCT is able to record environment probes of the world while recording. To import these to Unreal use the same Editor Widget you used when importing a session but press the "Import Environment Probes" button instead. Browse to the dat-file for environment probes named "environment.dat". The World Outliner should now show the imported Box Reflection Captures.
+Import the Cubemap textures named "environment_0.png", etc and use with the newly created Box Captures. 
+**Please note** that Unreal doesn't support importing the cubemap textures directly. You need to use an external tool such as Photoshop and NVidia Texture tool. The cubemaps created by SCT adheres to the NVidia layout.
+
+![Alt text](Documentation/CubeMapNvidiaLayout.jpg?raw=true "Cubemap Layout")
